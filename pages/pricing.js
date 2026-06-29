@@ -143,7 +143,7 @@ export default function Pricing() {
         <div style={{ maxWidth: 960, margin: '0 auto', padding: '3rem 2rem' }}>
 
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Pricing</p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#A1003d', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Pricing</p>
             <h1 style={{ fontSize: 32, fontWeight: 500, color: '#1a1a1a', lineHeight: 1.25, marginBottom: 10 }}>Find verified prospects.<br />Send emails that get replies.</h1>
             <p style={{ fontSize: 15, color: '#666', marginBottom: 28 }}>Three AI agents working together. One flat monthly price.</p>
 
@@ -151,7 +151,7 @@ export default function Pricing() {
               <span style={{ fontSize: 13, color: isAnnual ? '#888' : '#1a1a1a', fontWeight: isAnnual ? 400 : 500 }}>Monthly</span>
               <div
                 onClick={() => setIsAnnual(!isAnnual)}
-                style={{ width: 40, height: 22, background: '#3b82f6', borderRadius: 11, cursor: 'pointer', position: 'relative' }}
+                style={{ width: 40, height: 22, background: '#A1003d', borderRadius: 11, cursor: 'pointer', position: 'relative' }}
               >
                 <div style={{ width: 16, height: 16, background: '#fff', borderRadius: '50%', position: 'absolute', top: 3, left: isAnnual ? 21 : 3, transition: 'left 0.2s' }} />
               </div>
@@ -169,9 +169,9 @@ export default function Pricing() {
               const price = getPrice(plan.monthly)
               const saving = getSaving(plan.monthly)
               return (
-                <div key={plan.name} style={{ background: '#fff', border: plan.primary ? '2px solid #3b82f6' : '1px solid #e5e5e3', borderRadius: 12, padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column' }}>
+                <div key={plan.name} style={{ background: '#fff', border: plan.primary ? '2px solid #A1003d' : '1px solid #e5e5e3', borderRadius: 12, padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column' }}>
                   {plan.badge && (
-                    <span style={{ fontSize: 11, background: '#eff6ff', color: '#2563eb', padding: '3px 10px', borderRadius: 20, fontWeight: 500, alignSelf: 'flex-start', marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, background: '#fff0f3', color: '#5e0023', padding: '3px 10px', borderRadius: 20, fontWeight: 500, alignSelf: 'flex-start', marginBottom: 10 }}>
                       {plan.badge}
                     </span>
                   )}
