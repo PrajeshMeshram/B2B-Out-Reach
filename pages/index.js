@@ -20,9 +20,11 @@ const SHADOW_SM = '0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.02)'
 const SHADOW_MD = '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)'
 const RADIUS = 12
 
-const STAGES = ['Series A', 'Series B', 'Series C']
-const GEOS = ['India', 'USA', 'EU', 'UK', 'UAE']
-const INDUSTRIES = ['B2B SaaS', 'HR Tech', 'Fintech', 'EdTech', 'Dev Tools']
+// Common presets shown as quick-add chips — not an exhaustive whitelist.
+// Users can type any value via the "+ Add" input below each section.
+const STAGE_PRESETS = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Series D+', 'Bootstrapped', 'Public']
+const GEO_PRESETS = ['India', 'USA', 'UK', 'EU', 'UAE', 'Canada', 'Australia', 'Singapore', 'Southeast Asia', 'LATAM', 'Africa', 'Global']
+const INDUSTRY_PRESETS = ['B2B SaaS', 'HR Tech', 'Fintech', 'EdTech', 'Dev Tools', 'Healthtech', 'E-commerce', 'Martech', 'Cybersecurity', 'Logistics', 'Climate Tech', 'AI/ML', 'Legal Tech', 'Real Estate Tech']
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -76,8 +78,6 @@ export default function Home() {
     const data = await res.json()
     if (data.contacts) setContacts(data.contacts)
   }
-
-  const toggle = (arr, setArr, val) => setArr(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val])
 
   const runAgents = async () => {
     if (!profile || !profile.onboarded) {
@@ -218,23 +218,6 @@ export default function Home() {
     )
   }
 
-  // ---- Reusable atoms, styled Apple-OS: pill chips, single accent, subtle borders ----
-  const chip = (label, active, onClick) => (
-    <button
-      key={label}
-      onClick={onClick}
-      style={{
-        fontSize: 13, padding: '6px 13px', borderRadius: 8, border: 'none',
-        background: active ? ACCENT : '#f0f0f2',
-        color: active ? '#fff' : TEXT_PRIMARY,
-        cursor: 'pointer', fontWeight: 500,
-        transition: 'background 0.12s ease'
-      }}
-    >
-      {label}
-    </button>
-  )
-
   const statusDot = (s) => {
     const map = { running: '#ff9f0a', done: '#34c759', error: '#ff3b30', idle: '#d2d2d7' }
     return <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: map[s] || map.idle, marginRight: 8, flexShrink: 0 }} />
@@ -333,18 +316,9 @@ export default function Home() {
                   <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: RADIUS, padding: '1.5rem', marginBottom: '1rem', boxShadow: SHADOW_SM }}>
                     <p style={{ fontSize: 17, fontWeight: 600, color: TEXT_PRIMARY, marginBottom: 18, letterSpacing: '-0.01em' }}>New search</p>
 
-                    {[
-                      { label: 'Funding stage', items: STAGES, selected: stages, set: setStages },
-                      { label: 'Geography', items: GEOS, selected: geos, set: setGeos },
-                      { label: 'Industry', items: INDUSTRIES, selected: industries, set: setIndustries },
-                    ].map(({ label, items, selected, set }) => (
-                      <div key={label} style={{ marginBottom: 18 }}>
-                        <p style={{ fontSize: 12, color: TEXT_TERTIARY, marginBottom: 8, fontWeight: 500 }}>{label}</p>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                          {items.map(i => chip(i, selected.includes(i), () => toggle(selected, set, i)))}
-                        </div>
-                      </div>
-                    ))}
+                    <TagSelector label="Funding stage" presets={STAGE_PRESETS} selected={stages} setSelected={setStages} placeholder="e.g. Series E, growth-stage…" />
+                    <TagSelector label="Geography" presets={GEO_PRESETS} selected={geos} setSelected={setGeos} placeholder="e.g. Germany, Japan, LATAM…" />
+                    <TagSelector label="Industry" presets={INDUSTRY_PRESETS} selected={industries} setSelected={setIndustries} placeholder="e.g. Insurtech, Web3, Travel…" />
 
                     <div style={{ marginBottom: 20 }}>
                       <p style={{ fontSize: 12, color: TEXT_TERTIARY, marginBottom: 8, fontWeight: 500 }}>Prospects per run</p>
@@ -645,6 +619,93 @@ function ProfileTab({ profile, onSaved }) {
         </button>
         {saved && <span style={{ fontSize: 13, color: '#1a7d3a' }}>Saved</span>}
       </div>
+    </div>
+  )
+}
+
+const SAFE_TAG = /^[A-Za-z0-9 ,&'\-]{1,60}$/
+
+function TagSelector({ label, presets, selected, setSelected, placeholder }) {
+  const [customInput, setCustomInput] = useState('')
+  const [inputError, setInputError] = useState('')
+
+  const toggle = (val) => {
+    setSelected(selected.includes(val) ? selected.filter(v => v !== val) : [...selected, val])
+  }
+
+  const addCustom = () => {
+    const val = customInput.trim()
+    if (!val) return
+    if (!SAFE_TAG.test(val)) {
+      setInputError('Use letters, numbers, and basic punctuation only')
+      return
+    }
+    if (selected.some(s => s.toLowerCase() === val.toLowerCase())) {
+      setInputError('Already added')
+      return
+    }
+    if (selected.length >= 8) {
+      setInputError('Max 8 selections')
+      return
+    }
+    setSelected([...selected, val])
+    setCustomInput('')
+    setInputError('')
+  }
+
+  const customSelected = selected.filter(s => !presets.includes(s))
+
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <p style={{ fontSize: 12, color: '#86868b', marginBottom: 8, fontWeight: 500 }}>{label}</p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+        {presets.map(p => (
+          <button
+            key={p}
+            onClick={() => toggle(p)}
+            style={{
+              fontSize: 13, padding: '6px 13px', borderRadius: 8, border: 'none',
+              background: selected.includes(p) ? '#A1003d' : '#f0f0f2',
+              color: selected.includes(p) ? '#fff' : '#1d1d1f',
+              cursor: 'pointer', fontWeight: 500
+            }}
+          >
+            {p}
+          </button>
+        ))}
+        {customSelected.map(c => (
+          <button
+            key={c}
+            onClick={() => toggle(c)}
+            style={{
+              fontSize: 13, padding: '6px 10px 6px 13px', borderRadius: 8, border: 'none',
+              background: '#A1003d', color: '#fff', cursor: 'pointer', fontWeight: 500,
+              display: 'flex', alignItems: 'center', gap: 6
+            }}
+          >
+            {c}
+            <span style={{ opacity: 0.7, fontSize: 11 }}>✕</span>
+          </button>
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <input
+          type="text"
+          value={customInput}
+          onChange={e => { setCustomInput(e.target.value); setInputError('') }}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom() } }}
+          placeholder={placeholder}
+          maxLength={60}
+          style={{ flex: 1, fontSize: 13, padding: '7px 10px', border: '1px solid #e5e5e7', borderRadius: 8, background: '#f9f9fa', color: '#1d1d1f' }}
+        />
+        <button
+          onClick={addCustom}
+          style={{ fontSize: 13, padding: '7px 14px', border: '1px solid #e5e5e7', background: '#fff', color: '#1d1d1f', borderRadius: 8, cursor: 'pointer', fontWeight: 500 }}
+        >
+          Add
+        </button>
+      </div>
+      {inputError && <p style={{ fontSize: 11, color: '#dc2626', marginTop: 5 }}>{inputError}</p>}
     </div>
   )
 }
